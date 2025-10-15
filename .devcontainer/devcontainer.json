@@ -1,0 +1,28 @@
+{
+    "name": "First project for Triton",
+    "dockerComposeFile": "compose.yaml",
+    "service": "devel",
+    "workspaceFolder": "/workspace",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "charliermarsh.ruff"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
+                "[python]": {
+                    "editor.codeActionsOnSave": {
+                        "source.fixAll.ruff": "explicit",
+                        "source.organizeImports.ruff": "explicit"
+                    },
+                    "editor.defaultFormatter": "charliermarsh.ruff",
+                    "editor.formatOnSave": true,
+                    "editor.formatOnType": true
+                }
+            }
+        }
+    },
+    "initializeCommand": ".devcontainer/init_env.sh",
+    "updateRemoteUserUID": true
+}

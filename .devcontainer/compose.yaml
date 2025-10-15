@@ -1,0 +1,22 @@
+services:
+  devel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        UID: ${HOST_UID:-20000}
+        GID: ${HOST_GID:-20000}
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /workspace
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    tty: true
+    gpus: all
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    command: bash
