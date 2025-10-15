@@ -2,13 +2,14 @@ FROM ubuntu:latest
 
 RUN apt update && apt-get --no-install-recommends install -y \
     build-essential \
-    git wget curl ca-certificates \
+    git wget curl ca-certificates ssh \
     python3-dev
 
 WORKDIR /workspace
 
 ARG UID=20000
 ARG GID=20000
+ARG UNAME="dev"
 RUN set -eux; \
     # 既存ユーザー・グループを安全に削除
     if getent passwd "${UID}" >/dev/null; then \
@@ -22,12 +23,12 @@ RUN set -eux; \
         groupdel "${oldgroup}" || true; \
     fi; \
     # 新規グループ・ユーザーを作成
-    groupadd -g "${GID}" dev; \
-    useradd -m -u "${UID}" -g "${GID}" -s /bin/bash dev; \
+    groupadd -g "${GID}" ${UNAME}; \
+    useradd -m -u "${UID}" -g "${GID}" -s /bin/bash ${UNAME}; \
     # 念のためホーム権限を確認
-    chown -R "${UID}:${GID}" /home/dev
+    chown -R "${UID}:${GID}" /home/${UNAME}
 
-USER dev
+USER ${UNAME}
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh

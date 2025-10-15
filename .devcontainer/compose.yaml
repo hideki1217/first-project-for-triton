@@ -6,6 +6,7 @@ services:
       args:
         UID: ${HOST_UID:-20000}
         GID: ${HOST_GID:-20000}
+        UNAME: developer
     develop:
       watch:
         - action: sync
@@ -13,6 +14,7 @@ services:
           target: /workspace
     volumes:
       - ..:/workspace
+      - ~/.ssh:/home/developer/.ssh
     working_dir: /workspace
     tty: true
     gpus: all
