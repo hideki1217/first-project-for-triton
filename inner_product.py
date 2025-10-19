@@ -62,18 +62,16 @@ def inner_product_(
         m_ptrs += BLOCK_SIZE * stride_m1
         v_ptrs += BLOCK_SIZE * stride_v0
 
-    tl.store(out_ptr + (pid_m * stride_out0), accum)
+    tl.store(out_ptr + (pid_m * stride_out0), accum.to(tl.float16))
 
 
 def inner_product(m, v):
     assert m.shape[1] == v.shape[0], "Incompatible dimensions"
     assert v.is_contiguous(), "Vector v must be contiguous"
     M, N = m.shape
-    N = v.shape[0]  # ← ここを修正：v.shape はタプルなので [0] を取る
+    N = v.shape[0]
 
-    out = torch.empty(
-        (M,), device=m.device, dtype=torch.float16
-    )  # 出力は行ごとのスカラー M 要素
+    out = torch.empty((M,), device=m.device, dtype=torch.float16)
 
     def grid(META):
         return (M,)
@@ -112,11 +110,11 @@ def test_inner_product_fp16():
         triton.testing.Benchmark(
             x_names=["M", "N"],  # Argument names to use as an x-axis for the plot
             x_vals=[
-                128 * i for i in range(2, 33)
+                128 * i for i in range(2, 36)
             ],  # Different possible values for `x_name`
             line_arg="provider",  # Argument name whose value corresponds to a different line in the plot
-            line_vals=["triton", "cuBLAS"],  # Label name for the lines
-            line_names=["Triton", "cuBLAS"],  # Line styles
+            line_vals=["triton", "torch"],  # Label name for the lines
+            line_names=["Triton", "Pytorch"],  # Line styles
             styles=[("green", "-"), ("blue", "-")],
             ylabel="TFLOPS",  # Label name for the y-axis
             plot_name="inner-performance-"
@@ -132,7 +130,7 @@ def benchmark(M, N, provider):
     b = torch.randn((N,), device=DEVICE, dtype=torch.float16)
     quantiles = [0.5, 0.2, 0.8]
 
-    if provider == "cuBLAS":
+    if provider == "torch":
         ms, min_ms, max_ms = triton.testing.do_bench(
             lambda: torch.inner(a, b), quantiles=quantiles
         )
